@@ -18,7 +18,9 @@ harness/
 benchmarks/
   items.json                 50項目の定義データ
   <項目ID>/run.<拡張子>       各言語の実装（例: sieve/run.c, sieve/run.py）
-.github/workflows/           GitHub Actions 置き場（yml をここにペースト）
+docs/github-actions/
+  benchmark.yml             GitHub Actions ワークフロー（この中身を
+                            .github/workflows/benchmark.yml にペーストして使う）
 results/                    計測結果（自動生成・コミットしない）
 ```
 
@@ -46,6 +48,6 @@ python3 harness/report.py
 
 - [x] 言語調査・50項目の定義（docs/、全項目の正解値も検証済み）
 - [x] ハーネス（run.py / report.py / merge_results.py）
-- [x] GitHub Actions ワークフロー（.github/workflows/benchmark.yml）
+- [x] GitHub Actions ワークフロー（docs/github-actions/benchmark.yml 用意済み → .github/workflows/ にペースト）
 - [x] スモークテスト実装（C / C++ / Python / Node.js / Perl）
 - [ ] 本命12言語の全50項目実装（次フェーズ）
