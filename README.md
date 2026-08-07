@@ -13,6 +13,7 @@ docs/                        調査・設計ドキュメント
 harness/
   run.py                     ベンチマーク実行ハーネス
   report.py                  ランキング・HTMLレポート生成
+  merge_results.py           言語別ジョブの結果を統合（CI用）
   languages.json             言語ごとのビルド/実行コマンド定義
 benchmarks/
   items.json                 50項目の定義データ
@@ -43,8 +44,8 @@ python3 harness/report.py
 
 ## 状態
 
-- [x] 言語調査・50項目の定義（docs/）
-- [x] ハーネス（run.py / report.py）
+- [x] 言語調査・50項目の定義（docs/、全項目の正解値も検証済み）
+- [x] ハーネス（run.py / report.py / merge_results.py）
+- [x] GitHub Actions ワークフロー（.github/workflows/benchmark.yml）
 - [x] スモークテスト実装（C / C++ / Python / Node.js / Perl）
 - [ ] 本命12言語の全50項目実装（次フェーズ）
-- [ ] GitHub Actions yml の設置（ユーザーがペースト）

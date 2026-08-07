@@ -92,7 +92,7 @@
     "label": "TypeScript (Node.js)",
     "family": "JITスクリプト",
     "ext": "ts",
-    "build": ["npx", "tsc", "{src}", "--outDir", "{bindir}", "--target", "es2020", "--strict", "false"],
+    "build": ["npx", "tsc", "{src}", "--outDir", "{bindir}", "--target", "es2020"],
     "run": ["node", "{bindir}/run.js"]
   },
   "python": {
