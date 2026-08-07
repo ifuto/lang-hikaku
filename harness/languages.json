@@ -1,0 +1,134 @@
+{
+  "c": {
+    "label": "C (GCC)",
+    "family": "ネイティブコンパイル",
+    "ext": "c",
+    "build": ["gcc", "-O2", "-std=c11", "{src}", "-o", "{bin}"],
+    "run": ["{bin}"]
+  },
+  "cpp": {
+    "label": "C++ (G++)",
+    "family": "ネイティブコンパイル",
+    "ext": "cpp",
+    "build": ["g++", "-O2", "-std=c++17", "{src}", "-o", "{bin}"],
+    "run": ["{bin}"]
+  },
+  "rust": {
+    "label": "Rust (rustc)",
+    "family": "ネイティブコンパイル",
+    "ext": "rs",
+    "build": ["rustc", "-O", "-C", "opt-level=3", "{src}", "-o", "{bin}"],
+    "run": ["{bin}"]
+  },
+  "go": {
+    "label": "Go",
+    "family": "ネイティブコンパイル",
+    "ext": "go",
+    "build": ["go", "build", "-o", "{bin}", "{src}"],
+    "run": ["{bin}"]
+  },
+  "zig": {
+    "label": "Zig",
+    "family": "ネイティブコンパイル",
+    "ext": "zig",
+    "build": ["zig", "build-exe", "{src}", "-O", "ReleaseFast", "-femit-bin={bin}"],
+    "run": ["{bin}"]
+  },
+  "swift": {
+    "label": "Swift",
+    "family": "ネイティブコンパイル",
+    "ext": "swift",
+    "build": ["swiftc", "-O", "{src}", "-o", "{bin}"],
+    "run": ["{bin}"]
+  },
+  "haskell": {
+    "label": "Haskell (GHC)",
+    "family": "ネイティブコンパイル",
+    "ext": "hs",
+    "build": ["ghc", "-O2", "{src}", "-o", "{bin}"],
+    "run": ["{bin}"]
+  },
+  "dart": {
+    "label": "Dart",
+    "family": "ネイティブコンパイル",
+    "ext": "dart",
+    "build": ["dart", "compile", "exe", "{src}", "-o", "{bin}"],
+    "run": ["{bin}"]
+  },
+  "java": {
+    "label": "Java (OpenJDK)",
+    "family": "VM (JIT)",
+    "ext": "java",
+    "build": ["javac", "-d", "{bindir}", "{src}"],
+    "run": ["java", "-cp", "{bindir}", "run"]
+  },
+  "csharp": {
+    "label": "C# (.NET)",
+    "family": "VM (JIT)",
+    "ext": "cs",
+    "build": ["dotnet", "build", "{proj}", "-c", "Release", "-o", "{bindir}/out", "-v", "q"],
+    "run": ["dotnet", "{bindir}/out/App.dll"]
+  },
+  "kotlin": {
+    "label": "Kotlin",
+    "family": "VM (JIT)",
+    "ext": "kt",
+    "build": ["kotlinc", "{src}", "-include-runtime", "-d", "{bin}.jar"],
+    "run": ["java", "-jar", "{bin}.jar"]
+  },
+  "julia": {
+    "label": "Julia",
+    "family": "JIT (科学計算)",
+    "ext": "jl",
+    "run": ["julia", "{src}"]
+  },
+  "node": {
+    "label": "JavaScript (Node.js)",
+    "family": "JITスクリプト",
+    "ext": "js",
+    "run": ["node", "{src}"]
+  },
+  "typescript": {
+    "label": "TypeScript (Node.js)",
+    "family": "JITスクリプト",
+    "ext": "ts",
+    "build": ["npx", "tsc", "{src}", "--outDir", "{bindir}", "--target", "es2020", "--strict", "false"],
+    "run": ["node", "{bindir}/run.js"]
+  },
+  "python": {
+    "label": "Python (CPython)",
+    "family": "インタプリタ",
+    "ext": "py",
+    "run": ["python3", "{src}"]
+  },
+  "ruby": {
+    "label": "Ruby (CRuby)",
+    "family": "インタプリタ",
+    "ext": "rb",
+    "run": ["ruby", "{src}"]
+  },
+  "php": {
+    "label": "PHP",
+    "family": "インタプリタ",
+    "ext": "php",
+    "run": ["php", "{src}"]
+  },
+  "perl": {
+    "label": "Perl",
+    "family": "インタプリタ",
+    "ext": "pl",
+    "run": ["perl", "{src}"]
+  },
+  "lua": {
+    "label": "Lua (LuaJIT)",
+    "family": "JITスクリプト",
+    "ext": "lua",
+    "run": ["luajit", "{src}"]
+  },
+  "r": {
+    "label": "R",
+    "family": "インタプリタ",
+    "ext": "R",
+    "run": ["Rscript", "{src}"]
+  }
+}

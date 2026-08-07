@@ -1,0 +1,6 @@
+# ビルド成果物・計測結果はコミットしない
+build/
+results/
+__pycache__/
+*.class
+*.o

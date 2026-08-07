@@ -1,0 +1,64 @@
+{
+  "schema_version": 1,
+  "note": "各項目は benchmarks/<id>/run.<ext> に実装する。プログラムは答え(チェックサム)を1行標準出力に出す。expected は items.json か benchmarks/<id>/expected.txt で指定。",
+  "items": [
+    {"id": "empty-loop", "category": "integer", "name_ja": "空ループ", "name_en": "Empty loop", "algorithm": "1からNまで加算して合計を出力（最適化で消えないように）", "workload": "N = 10^9", "measures": "純粋なループ・分岐の速度", "timeout_sec": 600, "expected": "500000000500000000"},
+    {"id": "fib-recursive", "category": "integer", "name_ja": "再帰フィボナッチ", "name_en": "Recursive Fibonacci", "algorithm": "fib(n) = fib(n-1)+fib(n-2) の素朴な再帰", "workload": "fib(35)", "measures": "関数呼び出し・再帰のコスト", "timeout_sec": 600, "expected": "9227465"},
+    {"id": "count-primes", "category": "integer", "name_ja": "試し割り素数カウント", "name_en": "Trial-division prime count", "algorithm": "奇数だけ試し割りして素数を数える", "workload": "2〜300,000", "measures": "整数除算・剰余の速度", "timeout_sec": 600, "expected": null},
+    {"id": "sieve", "category": "integer", "name_ja": "エラトステネスのふるい", "name_en": "Sieve of Eratosthenes", "algorithm": "ふるい法で素数を数える", "workload": "10,000,000以下（素数664,579個）", "measures": "配列アクセス・多重ループ", "timeout_sec": 600, "expected": "664579"},
+    {"id": "gcd", "category": "integer", "name_ja": "ユークリッド互除法", "name_en": "GCD (Euclid)", "algorithm": "線形合同法の乱数ペア5×10^6組のGCDを求めて合計を出力", "workload": "5,000,000ペア", "measures": "剰余演算の速度", "timeout_sec": 600, "expected": null},
+    {"id": "powmod", "category": "integer", "name_ja": "冪剰余", "name_en": "Modular exponentiation", "algorithm": "a^b mod m をバイナリ法で計算", "workload": "10^6回", "measures": "乗算・剰余・ループ", "timeout_sec": 600, "expected": null},
+    {"id": "collatz", "category": "integer", "name_ja": "コラッツ数列", "name_en": "Collatz sequence", "algorithm": "1になるまでのステップ数の最大値を求める", "workload": "1〜1,000,000", "measures": "整数分岐ループ", "timeout_sec": 600, "expected": null},
+    {"id": "factorize", "category": "integer", "name_ja": "素因数分解", "name_en": "Integer factorization", "algorithm": "10^12付近の合成数2,000個を試し割りで分解し、最大の素因数の合計を出力", "workload": "2,000個", "measures": "除算・ループ", "timeout_sec": 900, "expected": null},
+
+    {"id": "monte-carlo-pi", "category": "float", "name_ja": "モンテカルロ法でπ", "name_en": "Monte Carlo Pi", "algorithm": "単位正方形に点を打ち円内の割合からπを推定", "workload": "10^8点", "measures": "乱数生成+浮動小数点演算", "timeout_sec": 600, "expected": null},
+    {"id": "pi-arctan", "category": "float", "name_ja": "級数でπ", "name_en": "Arctan series for Pi", "algorithm": "π = 4(1−1/3+1/5−1/7+…) を加算", "workload": "10^8項", "measures": "浮動小数点の加減算ループ", "timeout_sec": 600, "expected": null},
+    {"id": "sqrt-newton", "category": "float", "name_ja": "ニュートン法で平方根", "name_en": "Newton sqrt", "algorithm": "初期値から収束まで反復（30回固定）", "workload": "10^7個", "measures": "浮動小数点演算・ループ", "timeout_sec": 600, "expected": null},
+    {"id": "matrix-mult", "category": "float", "name_ja": "行列積", "name_en": "Matrix multiplication", "algorithm": "線形合同法で生成した300×300整数行列の積（int64・i-k-jループ順）", "workload": "300×300", "measures": "多重ループ・メモリアクセス", "timeout_sec": 600, "expected": "65854542160"},
+    {"id": "matrix-transpose", "category": "float", "name_ja": "行列転置", "name_en": "Matrix transpose", "algorithm": "5000×5000行列の転置（コピー）", "workload": "5,000×5,000", "measures": "メモリアクセスの順序（キャッシュ）", "timeout_sec": 600, "expected": null},
+    {"id": "spectral-norm", "category": "float", "name_ja": "スペクトルノルム", "name_en": "Spectral norm", "algorithm": "べき乗法でスペクトルノルムを計算（ベンチマークゲーム定番）", "workload": "n = 2,000", "measures": "浮動小数点・配列の総合性能", "timeout_sec": 600, "expected": null},
+    {"id": "nbody", "category": "float", "name_ja": "n体シミュレーション", "name_en": "N-body", "algorithm": "太陽系5天体の軌道をシンプレクティック積分で計算", "workload": "5,000,000ステップ", "measures": "浮動小数点の総合性能", "timeout_sec": 600, "expected": null},
+    {"id": "mandelbrot", "category": "float", "name_ja": "マンデルブロ集合", "name_en": "Mandelbrot set", "algorithm": "4000×4000画素で発散判定（最大1000回反復）", "workload": "4,000×4,000", "measures": "複素数演算・分岐ループ", "timeout_sec": 600, "expected": null},
+    {"id": "gaussian-elim", "category": "float", "name_ja": "ガウスの消去法", "name_en": "Gaussian elimination", "algorithm": "300元連立一次方程式を前進消去+後退代入", "workload": "300元", "measures": "浮動小数点・メモリ", "timeout_sec": 600, "expected": null},
+    {"id": "numerical-integral", "category": "float", "name_ja": "数値積分", "name_en": "Numerical integration", "algorithm": "シンプソン則で ∫0^1 4/(1+x^2)dx を計算", "workload": "10^8分割", "measures": "浮動小数点ループ", "timeout_sec": 600, "expected": null},
+
+    {"id": "string-concat", "category": "string", "name_ja": "文字列連結", "name_en": "String concatenation", "algorithm": "「a」を10^5回連結して1MBの文字列を作り、長さを出力", "workload": "10^5回", "measures": "文字列メモリ管理", "timeout_sec": 600, "expected": "100000"},
+    {"id": "string-reverse", "category": "string", "name_ja": "文字列反転", "name_en": "String reverse", "algorithm": "10MBの文字列を反転する操作を10回", "workload": "10MB×10回", "measures": "文字列・配列の操作速度", "timeout_sec": 600, "expected": null},
+    {"id": "char-count", "category": "string", "name_ja": "文字カウント", "name_en": "Character count", "algorithm": "10MBテキストを走査し英字・数字・空白の個数を数える", "workload": "10MB", "measures": "文字列走査の速度", "timeout_sec": 600, "expected": null},
+    {"id": "substring-search", "category": "string", "name_ja": "部分文字列検索", "name_en": "Substring search", "algorithm": "テキストからパターン（全部で出現数が決まるよう設計）を探して出現回数を出力", "workload": "10MB×1000パターン", "measures": "文字列検索アルゴリズム", "timeout_sec": 900, "expected": null},
+    {"id": "regex-match", "category": "string", "name_ja": "正規表現マッチ", "name_en": "Regex match", "algorithm": "DNA配列で8塩基パターンの出現数を正規表現で数える", "workload": "10MB×1000パターン", "measures": "正規表現エンジンの速度", "timeout_sec": 900, "expected": null},
+    {"id": "regex-replace", "category": "string", "name_ja": "正規表現置換", "name_en": "Regex replace", "algorithm": "テキストに置換パターン5種を適用し、置換後の長さを出力", "workload": "10MB", "measures": "正規表現エンジンの速度", "timeout_sec": 900, "expected": null},
+    {"id": "sha256", "category": "string", "name_ja": "SHA-256ハッシュ", "name_en": "SHA-256 hashing", "algorithm": "100KBデータのSHA-256を10^4回計算", "workload": "10^4回", "measures": "標準ライブラリのハッシュ速度", "timeout_sec": 600, "expected": null},
+
+    {"id": "hash-insert", "category": "data", "name_ja": "ハッシュマップ挿入", "name_en": "Hash map insert", "algorithm": "「k%07d」形式のキーをマップに挿入", "workload": "10^6件", "measures": "ハッシュ・メモリ管理", "timeout_sec": 600, "expected": "1000000"},
+    {"id": "hash-lookup", "category": "data", "name_ja": "ハッシュマップ検索", "name_en": "Hash map lookup", "algorithm": "挿入済みの全キーを検索して値の合計を出力", "workload": "10^6件", "measures": "ハッシュ・キー比較", "timeout_sec": 600, "expected": "499999500000"},
+    {"id": "sort-ints", "category": "data", "name_ja": "整数配列ソート", "name_en": "Integer array sort", "algorithm": "線形合同法で生成した10^7個の32ビット整数をソート", "workload": "10^7個", "measures": "ソートアルゴリズム（ライブラリ含む）", "timeout_sec": 900, "expected": null},
+    {"id": "sort-strings", "category": "data", "name_ja": "文字列ソート", "name_en": "String sort", "algorithm": "ランダムな10^6個の文字列をソート", "workload": "10^6個", "measures": "ソート+文字列比較", "timeout_sec": 900, "expected": null},
+    {"id": "bst", "category": "data", "name_ja": "二分探索木", "name_en": "Binary search tree", "algorithm": "10^6件挿入後、10^6件検索", "workload": "挿入10^6+検索10^6", "measures": "ポインタ追従・比較", "timeout_sec": 900, "expected": null},
+    {"id": "heap", "category": "data", "name_ja": "優先度キュー", "name_en": "Priority queue", "algorithm": "10^6件push→10^6件popして合計を出力", "workload": "10^6+10^6", "measures": "データ構造の操作速度", "timeout_sec": 900, "expected": null},
+    {"id": "dedupe", "category": "data", "name_ja": "重複除去", "name_en": "Deduplication", "algorithm": "10^6個（10^5種）の値を集合に入れ、種類数を出力", "workload": "10^6個", "measures": "集合演算", "timeout_sec": 600, "expected": "100000"},
+    {"id": "stack-queue", "category": "data", "name_ja": "スタックとキュー", "name_en": "Stack and queue", "algorithm": "10^7回のpush/pop（合計値を出力）", "workload": "10^7回", "measures": "データ構造の基本操作", "timeout_sec": 900, "expected": null},
+
+    {"id": "binary-trees", "category": "algorithm", "name_ja": "二分木の生成と解放", "name_en": "Binary trees", "algorithm": "深さ19の二分木を生成・走査・破棄（10回）", "workload": "深さ19×10回", "measures": "メモリ確保・解放（GCの影響）", "timeout_sec": 600, "expected": null},
+    {"id": "hanoi", "category": "algorithm", "name_ja": "ハノイの塔", "name_en": "Towers of Hanoi", "algorithm": "25枚の円盤移動を再帰で実行し、移動回数を出力", "workload": "25枚（2^25−1回）", "measures": "再帰・関数呼び出し", "timeout_sec": 900, "expected": "33554431"},
+    {"id": "nqueens", "category": "algorithm", "name_ja": "n-クイーン", "name_en": "N-Queens", "algorithm": "13×13盤の解の総数をバックトラッキングで数える", "workload": "13×13", "measures": "バックトラッキング探索", "timeout_sec": 900, "expected": "73712"},
+    {"id": "knapsack", "category": "algorithm", "name_ja": "ナップサック問題", "name_en": "0/1 Knapsack (DP)", "algorithm": "動的計画法で最大価値を計算", "workload": "アイテム2,000×容量2,000", "measures": "DP・配列アクセス", "timeout_sec": 900, "expected": null},
+    {"id": "fannkuch", "category": "algorithm", "name_ja": "fannkuch-redux", "name_en": "Fannkuch-redux", "algorithm": "順列の反転操作の最大回数を求める（ベンチマークゲーム定番）", "workload": "n = 10", "measures": "順列・配列操作", "timeout_sec": 900, "expected": null},
+    {"id": "levenshtein", "category": "algorithm", "name_ja": "レーベンシュタイン距離", "name_en": "Levenshtein distance", "algorithm": "500×500文字の編集距離をDPで計算", "workload": "500×500", "measures": "DP・文字列", "timeout_sec": 900, "expected": null},
+
+    {"id": "pidigits", "category": "bigint", "name_ja": "πの桁計算", "name_en": "Pi digits (spigot)", "algorithm": "spigotアルゴリズムでπを2,000桁計算", "workload": "2,000桁", "measures": "多倍長整数演算", "timeout_sec": 900, "expected": null},
+    {"id": "factorial-bigint", "category": "bigint", "name_ja": "巨大階乗", "name_en": "Big factorial", "algorithm": "50,000! を計算し、桁数を出力", "workload": "50,000!（21万桁超）", "measures": "多倍長整数の乗算", "timeout_sec": 900, "expected": null},
+    {"id": "fib-bigint", "category": "bigint", "name_ja": "巨大フィボナッチ", "name_en": "Big Fibonacci", "algorithm": "fib(100,000) を計算し、桁数を出力", "workload": "fib(100000)", "measures": "多倍長整数の加算", "timeout_sec": 900, "expected": null},
+
+    {"id": "file-write", "category": "io", "name_ja": "ファイル書き込み", "name_en": "File write", "algorithm": "10^6行（約50MB）を output.txt に書き込む", "workload": "50MB", "measures": "ファイル書き込み速度", "timeout_sec": 600, "expected": null},
+    {"id": "file-read", "category": "io", "name_ja": "ファイル読み込み", "name_en": "File read", "algorithm": "file-writeが生成した output.txt を読み、行数を出力", "workload": "50MB", "measures": "ファイル読み込み速度", "timeout_sec": 600, "expected": "1000000"},
+    {"id": "word-count", "category": "io", "name_ja": "単語カウント", "name_en": "Word count", "algorithm": "50MBテキストを読み、単語数を数える", "workload": "50MB", "measures": "I/O+文字列処理", "timeout_sec": 900, "expected": null},
+    {"id": "json-parse", "category": "io", "name_ja": "JSONパース", "name_en": "JSON parse", "algorithm": "10万件のレコード（約20MB）をパースして集計", "workload": "20MB", "measures": "パーサーの速度", "timeout_sec": 900, "expected": null},
+
+    {"id": "thread-spawn", "category": "concurrency", "name_ja": "スレッド生成と参加", "name_en": "Thread spawn", "algorithm": "10^4スレッドを生成し、それぞれ小さな計算をしてjoin、合計を出力", "workload": "10^4スレッド", "measures": "スレッドの生成コスト", "timeout_sec": 900, "expected": null},
+    {"id": "thread-ring", "category": "concurrency", "name_ja": "スレッドリング", "name_en": "Thread ring", "algorithm": "1,000スレッドをリング状に繋ぎトークンを1,000周回す（ベンチマークゲーム定番）", "workload": "1,000×1,000周", "measures": "スレッド間通信", "timeout_sec": 900, "expected": null},
+
+    {"id": "random-gen", "category": "misc", "name_ja": "乱数生成", "name_en": "Random number generation", "algorithm": "線形合同法で10^8個生成し合計を出力", "workload": "10^8個", "measures": "乱数生成器（とループ）の速度", "timeout_sec": 600, "expected": null},
+    {"id": "fasta-gen", "category": "misc", "name_ja": "DNA配列生成", "name_en": "FASTA generation", "algorithm": "擬似乱数で100万塩基のFASTA形式を生成（ベンチマークゲーム定番）", "workload": "100万塩基", "measures": "乱数+文字列+書式整形", "timeout_sec": 600, "expected": null}
+  ]
+}
