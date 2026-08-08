@@ -86,12 +86,30 @@ def rank_langs(item_tables, langs_cfg, lang_filter=None):
                 if lang in stats:
                     stats[lang]["wins"] += 1
 
+    # カテゴリごとの項目数を数えて加重用の重みを計算 (カテゴリ均等加重)
+    cat_counts = {}
+    for tbl in item_tables.values():
+        cat = tbl["item"]["category"]
+        cat_counts[cat] = cat_counts.get(cat, 0) + 1
+    num_cats = len(cat_counts) if cat_counts else 1
+
     # 幾何平均スコアと算術平均、中央値なども計算
     for lang in list(stats.keys()):
         rels = []
+        times = []
+        weighted_log_sum = 0.0
+        weighted_weight_sum = 0.0
         for tbl in item_tables.values():
             if lang in tbl["rel"]:
-                rels.append(tbl["rel"][lang])
+                rel = tbl["rel"][lang]
+                rels.append(rel)
+                times.append(tbl["langs"][lang])
+                # 加重: カテゴリ数で割る
+                cat = tbl["item"]["category"]
+                w = (1.0 / num_cats) / cat_counts.get(cat, 1)
+                weighted_log_sum += w * math.log(rel) if rel > 0 else 0
+                weighted_weight_sum += w
+
         g = geomean(rels) if rels else None
         stats[lang]["score"] = g
         stats[lang]["completed"] = len(rels)
@@ -100,8 +118,50 @@ def rank_langs(item_tables, langs_cfg, lang_filter=None):
             stats[lang]["median_rel"] = statistics.median(rels)
             stats[lang]["max_rel"] = max(rels)
             stats[lang]["min_rel"] = min(rels)
+            # 調和平均 (Equal Work) - レートの平均に適切 [5]
+            try:
+                stats[lang]["harmonic_mean"] = len(rels) / sum(1.0 / r for r in rels if r != 0)
+            except ZeroDivisionError:
+                stats[lang]["harmonic_mean"] = None
+            # 加重幾何平均
+            stats[lang]["weighted_geomean"] = math.exp(weighted_log_sum / weighted_weight_sum) if weighted_weight_sum else None
+            # 合計時間
+            stats[lang]["total_time"] = sum(times)
         else:
             stats[lang]["arith_mean"] = None
+            stats[lang]["harmonic_mean"] = None
+            stats[lang]["weighted_geomean"] = None
+            stats[lang]["total_time"] = None
+
+    # ELOレーティング (簡易版)
+    # 初期レート1500、項目ごとに全言語ペアで勝敗
+    elo = {lang: 1500.0 for lang in stats}
+    K = 32
+    for tbl in item_tables.values():
+        langs_in_item = list(tbl["rel"].keys())
+        # ペアワイズ
+        for i in range(len(langs_in_item)):
+            for j in range(i+1, len(langs_in_item)):
+                la = langs_in_item[i]
+                lb = langs_in_item[j]
+                if la not in elo or lb not in elo:
+                    continue
+                ra = elo[la]
+                rb = elo[lb]
+                # 期待勝率
+                ea = 1.0 / (1.0 + 10 ** ((rb - ra) / 400))
+                eb = 1.0 / (1.0 + 10 ** ((ra - rb) / 400))
+                # 実際の勝敗: relが小さい方が勝ち
+                if tbl["rel"][la] < tbl["rel"][lb]:
+                    sa, sb = 1.0, 0.0
+                elif tbl["rel"][la] > tbl["rel"][lb]:
+                    sa, sb = 0.0, 1.0
+                else:
+                    sa, sb = 0.5, 0.5
+                elo[la] = ra + K * (sa - ea)
+                elo[lb] = rb + K * (sb - eb)
+    for lang in stats:
+        stats[lang]["elo"] = elo.get(lang, 1500.0)
 
     ordered = sorted(stats.items(), key=lambda kv: (kv[1]["score"] is None, kv[1]["score"] or 1e18))
     return ordered
@@ -153,21 +213,38 @@ def main():
              f"生成日時: {data['meta'].get('generated_at', '?')}",
              f"マシン: {data['meta'].get('machine', '?')}",
              "", "## 総合ランキング（相対倍率の幾何平均、小さいほど速い・最速=1.00）", "",
-             "| 順位 | 言語 | 総合スコア(幾何平均) | 算術平均 | 中央値 | 最大遅延 | 完了項目 | 最速回数 | 分類 |",
-             "|---|---|---|---|---|---|---|---|---|"]
+             "| 順位 | 言語 | 幾何平均 | 加重幾何平均(カテゴリ均等) | 調和平均(EWS) | 算術平均 | 中央値 | 最大遅延 | 合計時間(秒) | ELO | 完了 | 最速 | 分類 |",
+             "|---|---|---|---|---|---|---|---|---|---|---|---|---|"]
     for i, (lang, st) in enumerate(ranking, 1):
         score = "%.2f" % st["score"] if st["score"] is not None else "-"
+        w_geo = "%.2f" % st.get("weighted_geomean", 0) if st.get("weighted_geomean") is not None else "-"
+        h_mean = "%.2f" % st.get("harmonic_mean", 0) if st.get("harmonic_mean") is not None else "-"
         arith = "%.2f" % st.get("arith_mean", 0) if st.get("arith_mean") is not None else "-"
         med_rel = "%.2f" % st.get("median_rel", 0) if st.get("median_rel") is not None else "-"
         max_rel = "%.2f" % st.get("max_rel", 0) if st.get("max_rel") is not None else "-"
-        lines.append(f"| {i} | {langs_cfg[lang]['label']} | {score} | {arith} | {med_rel} | {max_rel} | {st['completed']}/{st['n_items']} | {st.get('wins', 0)} | {langs_cfg[lang]['family']} |")
-    lines += ["", "## なぜ最速回数が多くても総合1位にならないのか？", "",
+        total = "%.1f" % st.get("total_time", 0) if st.get("total_time") is not None else "-"
+        elo = "%.0f" % st.get("elo", 1500) if st.get("elo") is not None else "-"
+        lines.append(f"| {i} | {langs_cfg[lang]['label']} | {score} | {w_geo} | {h_mean} | {arith} | {med_rel} | {max_rel} | {total} | {elo} | {st['completed']}/{st['n_items']} | {st.get('wins', 0)} | {langs_cfg[lang]['family']} |")
+    lines += ["", "## レーティング方法の比較（より良い方法とは？）", "",
+              "Web検索で調べたベンチマーク集計のベストプラクティスを反映して、複数の指標を併記しています。",
+              "", "### 主な指標",
+              "- **幾何平均 (Geomean)**: Benchmarks Gameのデフォルト。Π rel_i のn乗根。正規化された比の平均に適していて外れ値に強い [1](https://grokipedia.com/page/The_Computer_Language_Benchmarks_Game) [4](https://benchmarksgame-team.pages.debian.net/benchmarksgame/box-plot-summary-charts.html)。ただし物理的意味が薄いという批判もある。",
+              "- **加重幾何平均**: カテゴリごとに均等に重み付け。整数演算が8項目もあるせいで総合が引っ張られるのを防ぐ。js-framework-benchmarkの手法 [2](https://github.com/krausest/js-framework-benchmark/wiki/Computation-of-the-weighted-geometric-mean) を参考。",
+              "- **調和平均 (Harmonic Mean, EWS)**: n / Σ(1/rel)。レートの平均に適切で、SPECの代替として論文で推奨されている最新の手法 [5](https://users.elis.ugent.be/~leeckhou/papers/CAL-2024-geomean.pdf)。Equal-Work Speedup (EWS) として知られる。",
+              "- **算術平均**: Σ rel / n。直感的だが極端に遅い項目に引っ張られる。",
+              "- **中央値**: 外れ値に最も強いが情報を捨てる。",
+              "- **合計時間**: Σ time。実際に全部実行したら何秒か、最も物理的意味が明確。",
+              "- **最速回数 (Gold)**: 1位になった回数。分かりやすいが安定性は見えない。",
+              "- **ELOレーティング**: チェス式。項目ごとに全言語ペアで勝敗を付けてレートを更新。直接対決の強さを反映。",
+              "- **Paretoランキング**: 速さだけでなくメモリやエネルギーも考慮した多目的ランキング [1](https://haslab.github.io/SAFER/scp21.pdf)。今後の拡張で対応可能。",
+              "", "### なぜ最速回数が多くても総合1位にならないのか？", "",
               "このレポートの総合スコアは**幾何平均**で計算されています。最速回数(金メダル数)とは違う指標です。",
               "", "> **例**: 言語Aが10項目中8項目で1.1倍の僅差で最速、残り2項目で10倍遅いとします。",
               "> 言語Bが2項目で最速だが、残り8項目は2倍遅いとします。",
               "> - 金メダル: A 8個、B 2個 → Aが優勢に見える",
               "> - 幾何平均: A = (1.1^8 * 10^2)^(1/10) ≈ 2.1倍、B = (1^2 * 2^8)^(1/10) ≈ 1.74倍 → Bが総合で速い",
-              "> つまり**極端に遅い項目があると幾何平均は大きく悪化**します。算術平均だとさらに悪化しますが、幾何平均は外れ値に強いのでまだマシです。",
+              "> - 調和平均: A = 10 / (8/1.1 + 2/10) ≈ 1.31倍、B = 10 / (2/1 + 8/2) = 1.66倍 → 今度はAが上になることも。平均の取り方で順位が変わる。",
+              "> つまり**極端に遅い項目があると幾何平均は大きく悪化**します。調和平均だとさらにペナルティが大きくなります [5](https://users.elis.ugent.be/~leeckhou/papers/CAL-2024-geomean.pdf)。",
               "", "自由研究の考察では「金メダル数」と「総合スコア」の両方を見て、",
               "- 金メダル数が多いが総合が悪い → 特定分野では最速だが苦手分野がある",
               "- 総合が良いが金メダルが少ない → どの項目でも安定して速い",
@@ -261,15 +338,19 @@ def main():
     h.append("</div>")
 
     # 総合ランキング表
-    h.append("<h2>総合ランキング</h2>")
-    h.append("<table><tr><th class='l'>順位</th><th class='l'>言語</th><th>総合スコア</th><th>算術平均</th><th>中央値</th><th>最大遅延</th><th>完了</th><th>最速回数</th><th class='l'>分類</th></tr>")
+    h.append("<h2>総合ランキング（複数指標）</h2>")
+    h.append("<p>幾何平均が主指標。加重幾何平均でカテゴリ偏りを補正、調和平均(EWS)は最新論文推奨 [5] の手法。</p>")
+    h.append("<table><tr><th class='l'>順位</th><th class='l'>言語</th><th>幾何平均</th><th>加重幾何</th><th>調和平均</th><th>算術平均</th><th>中央値</th><th>合計秒</th><th>ELO</th><th>完了</th><th>最速</th><th class='l'>分類</th></tr>")
     for i, (lang, st) in enumerate(ranking, 1):
         cls = f"rank{i}" if i <= 3 else ""
         score = f"{st['score']:.2f}" if st["score"] is not None else "-"
+        w_geo = f"{st.get('weighted_geomean', 0):.2f}" if st.get("weighted_geomean") is not None else "-"
+        h_mean = f"{st.get('harmonic_mean', 0):.2f}" if st.get("harmonic_mean") is not None else "-"
         arith = f"{st.get('arith_mean', 0):.2f}" if st.get("arith_mean") is not None else "-"
         med_rel = f"{st.get('median_rel', 0):.2f}" if st.get("median_rel") is not None else "-"
-        max_rel = f"{st.get('max_rel', 0):.2f}" if st.get("max_rel") is not None else "-"
-        h.append(f"<tr><td class='{cls}'>{i}</td><td class='l'>{esc(langs_cfg[lang]['label'])}</td><td>{score}</td><td>{arith}</td><td>{med_rel}</td><td>{max_rel}</td><td>{st['completed']}/{st['n_items']}</td><td>{st.get('wins', 0)}</td><td class='l'>{esc(langs_cfg[lang]['family'])}</td></tr>")
+        total = f"{st.get('total_time', 0):.1f}" if st.get("total_time") is not None else "-"
+        elo = f"{st.get('elo', 0):.0f}" if st.get("elo") is not None else "-"
+        h.append(f"<tr><td class='{cls}'>{i}</td><td class='l'>{esc(langs_cfg[lang]['label'])}</td><td>{score}</td><td>{w_geo}</td><td>{h_mean}</td><td>{arith}</td><td>{med_rel}</td><td>{total}</td><td>{elo}</td><td>{st['completed']}/{st['n_items']}</td><td>{st.get('wins', 0)}</td><td class='l'>{esc(langs_cfg[lang]['family'])}</td></tr>")
     h.append("</table>")
 
     # カテゴリ別

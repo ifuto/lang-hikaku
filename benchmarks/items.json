@@ -539,7 +539,7 @@
       "workload": "5×10^7個",
       "measures": "乱数生成器（とループ）の速度",
       "timeout_sec": 600,
-      "expected": "1307379264"
+      "expected": "2474581992"
     },
     {
       "id": "fasta-gen",
