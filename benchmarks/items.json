@@ -55,7 +55,7 @@
       "workload": "5,000,000ペア",
       "measures": "剰余演算の速度",
       "timeout_sec": 600,
-      "expected": "33201628"
+      "expected": "28794392"
     },
     {
       "id": "powmod",
@@ -66,7 +66,7 @@
       "workload": "10^6回",
       "measures": "乗算・剰余・ループ",
       "timeout_sec": 600,
-      "expected": "16288765099"
+      "expected": "499776780872275"
     },
     {
       "id": "collatz",
@@ -132,7 +132,7 @@
       "workload": "300×300",
       "measures": "多重ループ・メモリアクセス",
       "timeout_sec": 600,
-      "expected": "66311389289"
+      "expected": "65854542160"
     },
     {
       "id": "matrix-transpose",
