@@ -4,3 +4,4 @@ results/
 __pycache__/
 *.class
 *.o
+.github/workflows/benchmark.yml
