@@ -3,7 +3,10 @@ name: benchmark
 on:
   workflow_dispatch: # 手動実行（Actionsタブの「Run workflow」ボタンを押す）
   push:
-    branches: [main]
+    branches:
+      - main
+      - arena/019fdee5-lang-hikaku
+      - arena/*
 
 permissions:
   contents: read
